@@ -83,7 +83,7 @@ export class RequestQueue {
 }
 
 // post切片
-export function postChunks(chunks: Chunks, hash: string) {
+export function postChunks(chunks: Chunks, hash: string, file: File) {
   if (!Array.isArray(chunks)) return
 
   const queue = new RequestQueue()
@@ -92,15 +92,17 @@ export function postChunks(chunks: Chunks, hash: string) {
   chunks.map((chunk: Blob, index) => {
     const data = new FormData()
 
-    data.append('chunk', chunk)
+    data.append('chunk', chunk, file?.name)
+    data.append('type', file?.type)
     data.append('index', String(index + 1))
     data.append('hash', hash)
+    data.append('fileName', file?.name)
     data.append('id', `${hash}-${index + 1}`)
     data.append('chunkSize', String(chunks.length))
 
     queue.add({
       method: 'POST',
-      url: '/chunks',
+      url: '/chunks/upload',
       data,
       headers: {
         'Content-Type': 'multipart/form-data'

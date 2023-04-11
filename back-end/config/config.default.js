@@ -19,6 +19,13 @@ module.exports = appInfo => {
     domainWhiteList: ['*']
   }
 
+  config.multipart = {
+    mode: 'file',
+    whitelist() {
+      return true
+    } 
+  }
+
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_1680940858199_1391';
 

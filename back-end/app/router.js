@@ -5,5 +5,6 @@
  */
 module.exports = app => {
   const { router, controller } = app;
-  router.post('/chunks', controller.home.index);
+  router.post('/', controller.home.index);
+  router.post('/chunks/upload', controller.chunks.upload);
 };

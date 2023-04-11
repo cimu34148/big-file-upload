@@ -11,7 +11,7 @@
 
       const chunks = createChunks(file) as Chunks
       const hash = await createWorker(chunks, percentage) as string
-      postChunks(chunks, hash)
+      postChunks(chunks, hash, file)
 
     } catch (error) {
       console.log(error)
