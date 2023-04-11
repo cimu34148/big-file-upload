@@ -8,3 +8,7 @@ declare module 'spark-md5' {
 declare module '*.vue' {
   export { ComponentOptions } from 'vue'
 }
+
+declare interface Window {
+  http: any
+}

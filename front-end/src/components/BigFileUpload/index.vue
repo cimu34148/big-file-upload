@@ -1,14 +1,21 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
-  import { createChunks, createWorker, Chunks } from './util'
+  import { createChunks, createWorker, Chunks, postChunks } from './util'
+
 
   const percentage = ref(0)
-  const upload = (e: any) => {
-    const file = e.target?.files?.[0]
-    if(!file) return;
+  const upload = async (e: any) => {
+    try {
+      const file = e.target?.files?.[0]
+      if(!file) return;
 
-    const chunks = createChunks(file) as Chunks
-    createWorker(chunks, percentage)
+      const chunks = createChunks(file) as Chunks
+      const hash = await createWorker(chunks, percentage) as string
+      postChunks(chunks, hash)
+
+    } catch (error) {
+      console.log(error)
+    }
 
   }
 </script>

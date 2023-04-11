@@ -12,6 +12,13 @@ module.exports = appInfo => {
    **/
   const config = exports = {};
 
+  config.security = {
+    csrf: {
+      enable: false
+    },
+    domainWhiteList: ['*']
+  }
+
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_1680940858199_1391';
 
