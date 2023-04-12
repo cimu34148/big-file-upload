@@ -114,6 +114,7 @@ export function postChunks(chunks: Chunks, hash: string, file: File) {
       // 全部响应完成 发送合并文件请求
       if(count === chunks.length) {
         console.log('全部响应')
+        axios.post('/chunks/merge', { hash, fileName: file?.name })
       }
     })
   })
