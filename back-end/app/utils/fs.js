@@ -2,6 +2,11 @@ const fsSync = require('fs/promises')
 const fs = require('fs')
 const path = require('path')
 
+// 获取hash路径
+const getHashPath = hash => path.resolve(__dirname, `../public/${hash}`)
+const getChunksPath = hash => path.resolve(__dirname, `../public/${hash}/chunks`)
+const getChunkPath = (hash, chunkId) => path.resolve(__dirname, `../public/${hash}/chunks/${chunkId}`)
+
 // 判断目录/文件是否存在
 async function isExist(path) {
   try {
@@ -32,16 +37,16 @@ async function createFile(path, content) {
 
 // 获取chunks
 async function getFiles(hash) {
-  const files = await fsSync.readdir(path.join(__dirname, `../public/resume/${hash}`))
+  const files = await fsSync.readdir(getChunksPath(hash))
   const result = []
 
   for (const file of files) {
-    const stats = await fsSync.stat(path.join(__dirname, `../public/resume/${hash}`, file))
+    const stats = await fsSync.stat(path.join(__dirname, `../public/${hash}/chunks`, file))
     if (stats.isFile()) {
       const { name, ext } = path.parse(file)
       result.push({
         name: `${name}${ext}`,
-        url: `/public/resume/${hash}/${file}`
+        url: `/public/${hash}/${file}`
       })
     }
   }
@@ -57,9 +62,9 @@ async function merge(files, hash, fileName) {
       return nameA - nameB
     })
 
-    let writeStream = fs.createWriteStream(path.resolve(__dirname, `../public/resume/${hash}/${fileName}`))
+    let writeStream = fs.createWriteStream(path.resolve(__dirname, `../public/${hash}/${fileName}`))
     sortFiles.map(async item => {
-      const filePath = path.resolve(__dirname, `../public/resume/${hash}/${item.name}`)
+      const filePath = path.resolve(__dirname, `../public/${hash}/chunks/${item.name}`)
       const readFile = fs.readFileSync(filePath)
       writeStream.write(readFile)
       fs.unlink(filePath, () => {})
@@ -75,5 +80,8 @@ module.exports = {
   createDirectory,
   createFile,
   getFiles,
-  merge
+  merge,
+  getHashPath,
+  getChunksPath,
+  getChunkPath
 }

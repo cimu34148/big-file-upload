@@ -100,22 +100,34 @@ export function postChunks(chunks: Chunks, hash: string, file: File) {
     data.append('id', `${hash}-${index + 1}`)
     data.append('chunkSize', String(chunks.length))
 
-    queue.add({
-      method: 'POST',
-      url: '/chunks/upload',
-      data,
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    }).then(res => {
-      count++
-      console.log(res)
-    }).finally(() => {
-      // 全部响应完成 发送合并文件请求
-      if(count === chunks.length) {
-        console.log('全部响应')
-        axios.post('/chunks/merge', { hash, fileName: file?.name })
-      }
-    })
+    queue
+      .add({
+        method: 'POST',
+        url: '/chunks/upload',
+        data,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      .then(res => {
+        count++
+        console.log(res)
+      })
+      .finally(() => {
+        // 全部响应完成 发送合并文件请求
+        if (count === chunks.length) {
+          console.log('全部响应')
+          axios.post('/chunks/merge', { hash, fileName: file?.name })
+        }
+      })
+  })
+}
+
+// 验证
+export async function validate(hash: string, chunkSize: number, fileName: string) {
+  return await axios.post('/chunks/validate', {
+    hash,
+    chunkSize,
+    fileName
   })
 }
