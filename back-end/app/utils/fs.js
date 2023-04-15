@@ -7,6 +7,24 @@ const getHashPath = hash => path.resolve(__dirname, `../public/${hash}`)
 const getChunksPath = hash => path.resolve(__dirname, `../public/${hash}/chunks`)
 const getChunkPath = (hash, chunkId) => path.resolve(__dirname, `../public/${hash}/chunks/${chunkId}`)
 
+// 查询目录下的所有文件（不包括目录）
+async function isExistMergeFile(path) {
+  try {
+    const files = fs.readdirSync(path)
+    for (const file of files) {
+      const filePath = fs.statSync(`${path}/${file}`)
+      if(!filePath.isDirectory() && filePath.size) {
+        return true
+      }
+    }
+  
+    return false
+  } catch (error) {
+    console.log(error)
+    return false
+  }
+}
+
 // 判断目录/文件是否存在
 async function isExist(path) {
   try {
@@ -69,6 +87,7 @@ async function merge(files, hash, fileName) {
       writeStream.write(readFile)
       fs.unlink(filePath, () => {})
     })
+    fs.rmdir(getChunksPath(hash), () => {})
     writeStream.end()
   } catch (error) {
     console.log(error)
@@ -83,5 +102,6 @@ module.exports = {
   merge,
   getHashPath,
   getChunksPath,
-  getChunkPath
+  getChunkPath,
+  isExistMergeFile
 }

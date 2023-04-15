@@ -18,7 +18,7 @@
       if(status === '0') {
         postChunks(chunks, hash, file)
       } else if(status === '1') {
-        alert('已存在同内容文件')
+        console.log('已存在同内容文件')
       } else if(status === '2') {
         if(files.length === chunks.length) {
           axios.post('/chunks/merge', { hash, fileName: file?.name })

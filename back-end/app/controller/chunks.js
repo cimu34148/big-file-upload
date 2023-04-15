@@ -41,7 +41,7 @@ class ChunksController extends Controller {
     const { ctx } = this
 
     try {
-      const { hash, fileName } = ctx.request.body
+      const { hash } = ctx.request.body
       const hashPath = fsTools.getHashPath(hash)
       const chunksPath = fsTools.getChunksPath(hash)
 
@@ -57,8 +57,8 @@ class ChunksController extends Controller {
         await fsTools.createDirectory(chunksPath)
       }
       
-      // 判断是否存在file文件
-      const fileExist = await fsTools.isExist(path.resolve(__dirname, `../public/${hash}/${fileName}`))
+      // 判断是否存在合并后的文件
+      const fileExist = await fsTools.isExistMergeFile(path.resolve(__dirname, `../public/${hash}`))
       
       if(!fileExist) {
         const files = fs.readdirSync(chunksPath)
