@@ -3,7 +3,6 @@
   import { createChunks, createWorker, ChunksArray, postChunks, validate } from './util'
   import axios from '@/utils/http'
 
-
   const percentage = ref(0)
   const upload = async (e: any) => {
     try {
@@ -42,5 +41,14 @@
 
 <template>
   <input type="file" id="" @change="upload">
-  <el-progress :text-inside="true" :percentage="percentage" :stroke-width="26"/>
+  <div id="hash-wrap">
+    <p>生成文件hash值</p>
+    <el-progress :text-inside="true" :percentage="percentage" :stroke-width="26"/>
+  </div>
 </template>
+
+<style scoped>
+#hash-wrap {
+  margin-top: 20px;
+}
+</style>

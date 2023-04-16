@@ -40,7 +40,7 @@ export function createWorker(chunks: ChunksArray, percentage: any) {
     worker.postMessage({ chunks })
     worker.onmessage = e => {
       const { percentage: progress, hash } = e.data
-      percentage.value = Math.ceil(progress)
+      percentage.value = parseInt(progress)
 
       if (hash) {
         resolve(hash)
