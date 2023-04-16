@@ -3,9 +3,10 @@ const fs = require('fs')
 const path = require('path')
 
 // 获取hash路径
-const getHashPath = hash => path.resolve(__dirname, `../public/${hash}`)
-const getChunksPath = hash => path.resolve(__dirname, `../public/${hash}/chunks`)
-const getChunkPath = (hash, chunkId) => path.resolve(__dirname, `../public/${hash}/chunks/${chunkId}`)
+const publicBasePath = '/public/'
+const getHashPath = hash => path.resolve(__dirname, `${publicBasePath}${hash}`)
+const getChunksPath = hash => path.resolve(__dirname, `${publicBasePath}${hash}/chunks`)
+const getChunkPath = (hash, chunkId) => path.resolve(__dirname, `${publicBasePath}${hash}/chunks/${chunkId}`)
 
 // 查询目录下的所有文件（不包括目录）
 async function isExistMergeFile(path) {
@@ -55,20 +56,26 @@ async function createFile(path, content) {
 
 // 获取chunks
 async function getFiles(hash) {
-  const files = await fsSync.readdir(getChunksPath(hash))
-  const result = []
-
-  for (const file of files) {
-    const stats = await fsSync.stat(path.join(__dirname, `../public/${hash}/chunks`, file))
-    if (stats.isFile()) {
-      const { name, ext } = path.parse(file)
-      result.push({
-        name: `${name}${ext}`,
-        url: `/public/${hash}/${file}`
-      })
+  try {
+    const files = await fsSync.readdir(getChunksPath(hash))
+    const result = []
+  
+    for (const file of files) {
+      const chunkPath = getChunkPath(hash, file)
+      const stats = await fsSync.stat(chunkPath)
+      if (stats.isFile()) {
+        const { name, ext } = path.parse(file)
+        result.push({
+          name: `${name}${ext}`,
+          url: chunkPath
+        })
+      }
     }
+    return result
+  } catch (error) {
+    console.error(error)
+    return []
   }
-  return result
 }
 
 // 合并chunks
@@ -80,14 +87,14 @@ async function merge(files, hash, fileName) {
       return nameA - nameB
     })
 
-    let writeStream = fs.createWriteStream(path.resolve(__dirname, `../public/${hash}/${fileName}`))
+    let writeStream = fs.createWriteStream(path.resolve(__dirname, `${publicBasePath}${hash}/${fileName}`))
     sortFiles.map(async item => {
-      const filePath = path.resolve(__dirname, `../public/${hash}/chunks/${item.name}`)
+      const filePath = getChunkPath(hash, item.name)
       const readFile = fs.readFileSync(filePath)
       writeStream.write(readFile)
       fs.unlink(filePath, () => {})
     })
-    fs.rmdir(getChunksPath(hash), () => {})
+    // fs.rmdir(getChunksPath(hash), () => {})
     writeStream.end()
   } catch (error) {
     console.log(error)
@@ -95,6 +102,7 @@ async function merge(files, hash, fileName) {
 }
 
 module.exports = {
+  publicBasePath,
   isExist,
   createDirectory,
   createFile,

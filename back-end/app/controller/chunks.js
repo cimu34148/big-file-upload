@@ -58,7 +58,7 @@ class ChunksController extends Controller {
       }
       
       // 判断是否存在合并后的文件
-      const fileExist = await fsTools.isExistMergeFile(path.resolve(__dirname, `../public/${hash}`))
+      const fileExist = await fsTools.isExistMergeFile(path.resolve(__dirname, `${fsTools.publicBasePath}${hash}`))
       
       if(!fileExist) {
         const files = fs.readdirSync(chunksPath)
@@ -97,23 +97,27 @@ class ChunksController extends Controller {
   }
 
   async merge() {
-    const { ctx } = this
-    const { hash, fileName } = ctx.request.body
-    const files = await fsTools.getFiles(hash, fileName)
-
-    if(files.length) {
-      await fsTools.merge(files, hash, fileName)
-      ctx.body = {
-        code: 200,
-        msg: '合并成功',
-        data: 'success'
+    try {
+      const { ctx } = this
+      const { hash, fileName } = ctx.request.body
+      const files = await fsTools.getFiles(hash, fileName)
+  
+      if(files.length) {
+        await fsTools.merge(files, hash, fileName)
+        ctx.body = {
+          code: 200,
+          msg: '合并成功',
+          data: 'success'
+        }
+      } else {
+        ctx.body = {
+          code: 400,
+          msg: '合成失败',
+          data: 'fail'
+        }
       }
-    } else {
-      ctx.body = {
-        code: 400,
-        msg: '合成失败',
-        data: 'fail'
-      }
+    } catch (error) {
+      this.ctx.logger.error(error)
     }
   }
 }

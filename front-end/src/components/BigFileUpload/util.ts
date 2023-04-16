@@ -2,26 +2,39 @@ import axios from '@/utils/http'
 import { AxiosRequestConfig, AxiosResponse } from 'axios'
 
 // 超过10M传参失败
-const SIZE = 3 * 1024 * 1024
+const SIZE = 5 * 1024 * 1024
 
-export type Chunks = File[]
+export interface Chunks {
+  file: File
+  type: string
+  index: number
+  fileName: string
+  id?: string
+  hash?: string
+}
+export type ChunksArray = Chunks[]
 
 // 1024 * 1024 是1M
 export function createChunks(file: File, size = SIZE) {
   if (!file || !(file instanceof File)) return
 
-  const chunks: Chunks = []
+  const chunks: ChunksArray = []
 
   for (let i = 0; i < file.size; i = i + size) {
     const chunk = file.slice(i, i + size) as File
-    chunks.push(chunk)
+    chunks.push({
+      file: chunk,
+      type: chunk?.type,
+      index: i,
+      fileName: file?.name
+    })
   }
 
   return chunks
 }
 
 // 创建worker
-export function createWorker(chunks: Chunks, percentage: any) {
+export function createWorker(chunks: ChunksArray, percentage: any) {
   return new Promise(resolve => {
     const worker = new Worker('../../../public/hash.js')
     worker.postMessage({ chunks })
@@ -47,7 +60,7 @@ export class RequestQueue {
   private count: number
   private queue: Request[]
 
-  constructor(maxRequests: number = 5) {
+  constructor(maxRequests: number = 6) {
     this.maxRequests = maxRequests
     this.count = 0
     this.queue = []
@@ -83,16 +96,16 @@ export class RequestQueue {
 }
 
 // post切片
-export function postChunks(chunks: Chunks, hash: string, file: File) {
+export function postChunks(chunks: ChunksArray, hash: string, file: File) {
   if (!Array.isArray(chunks)) return
 
   const queue = new RequestQueue()
   let count = 0
 
-  chunks.map((chunk: Blob, index) => {
+  chunks.map((chunk: Chunks, index) => {
     const data = new FormData()
 
-    data.append('chunk', chunk, file?.name)
+    data.append('chunk', chunk.file, file?.name)
     data.append('type', file?.type)
     data.append('index', String(index + 1))
     data.append('hash', hash)

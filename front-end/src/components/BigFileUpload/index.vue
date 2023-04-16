@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { ref } from 'vue'
-  import { createChunks, createWorker, Chunks, postChunks, validate } from './util'
+  import { createChunks, createWorker, ChunksArray, postChunks, validate } from './util'
   import axios from '@/utils/http'
 
 
@@ -10,8 +10,13 @@
       const file = e.target?.files?.[0]
       if(!file) return;
 
-      const chunks = createChunks(file) as Chunks
+      let chunks = createChunks(file) as ChunksArray
       const hash = await createWorker(chunks, percentage) as string
+      chunks = chunks.map((chunk, index) => ({
+        ...chunk,
+        id: `${hash}-${index + 1}`,
+        hash
+      }))
       const { data = {} } = await validate(hash, chunks.length, file.name)
       const { status, files = [] } = data
 

@@ -9,7 +9,7 @@ self.onmessage = e => {
 
   const load = index => {
     const reader = new FileReader()
-    const file = chunks[index]
+    const file = chunks[index]?.file
     reader.readAsArrayBuffer(file)
     reader.onload = (readerEvent) => {
       count++
